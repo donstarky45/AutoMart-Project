@@ -62,6 +62,4 @@ public class UserController {
 //    ) throws IOException {
 //        service.refreshToken(request, response);
 //    }
-
-// to do
 }
