@@ -40,5 +40,6 @@ public class AddressEntity implements Serializable {
     @ManyToOne
     @JoinColumn(name = "TutorialNew_id")
     private UserEntity userDetails;
-
+// added to do
+    
 }
