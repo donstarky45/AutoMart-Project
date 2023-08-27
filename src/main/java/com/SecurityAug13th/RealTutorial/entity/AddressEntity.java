@@ -41,5 +41,5 @@ public class AddressEntity implements Serializable {
     @JoinColumn(name = "TutorialNew_id")
     private UserEntity userDetails;
 // added to do
-    
+    // Second to do
 }
