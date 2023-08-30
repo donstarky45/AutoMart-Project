@@ -7,7 +7,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.Link;
 
 import java.util.List;
 
@@ -27,7 +26,7 @@ public class AuthenticationResponse extends EntityModel<AuthenticationResponse> 
     private String email;
     private String accountNumber;
     private List<AddressEntity> addresses;
-    private Link link;
+
 
 
 }

@@ -28,7 +28,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
      private final UserRepository repository;
-  //  private final TokenRepository tokenRepository;
 
     @Override
     protected void doFilterInternal(
@@ -52,9 +51,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         userEmail = jwtService.extractUsername(jwt);
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
-//            var isTokenValid = tokenRepository.findByToken(jwt)
-//                    .map(t -> !t.isExpired() && !t.isRevoked())
-//                    .orElse(false);
+
             if (jwtService.isTokenValid(jwt, userDetails)) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
@@ -71,19 +68,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
 
     }
-//    public void addHeder(HttpServletRequest req, HttpServletResponse res) throws AuthenticationException {
-//
-//        final String jwt;
-//        final String userEmail;
-//        final String authHeader = req.getHeader("Authorization");
-//        jwt = authHeader.substring(7);
-//        userEmail = jwtService.extractUsername(jwt);
-//        UserDto userDto = new UserDto();
-//        var user = repository.findByEmail(userEmail);
-//        BeanUtils.copyProperties(user, userDto);
-//        res.addHeader("UserId", userDto.getUserId());
-//
-//    }
-
 
     }

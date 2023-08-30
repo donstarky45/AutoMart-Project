@@ -22,5 +22,4 @@ public class RegisterRequest {
     private String accountNumber;
     private Role role = Role.USER;
     private List<AddressRequest> addresses;
-//    private List<TransactionRequest> transactions;
 }

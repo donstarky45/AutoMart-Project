@@ -48,8 +48,7 @@ private double balance;
     @OneToMany(mappedBy=("userDetails"), cascade=CascadeType.ALL)
     private List<Transactions> transactions;
 
-//    @OneToMany(mappedBy = "user")
-//    private List<Token> tokens;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

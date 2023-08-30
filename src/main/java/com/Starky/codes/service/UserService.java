@@ -40,7 +40,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository repository;
-    //   private final TokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
@@ -74,7 +73,7 @@ public class UserService {
         UserEntity createdUser = modelMapper.map(userDto, UserEntity.class);
         createdUser.setUserId(userUtils.generateUserId(15));
         createdUser.setAccountNumber(accountUtils.generate(10));
-        createdUser.setBalance(1000);
+        createdUser.setBalance(50000);
         createdUser.setPassword(passwordEncoder.encode(createdUser.getPassword()));
 
         List<Transactions> userTransaction = new ArrayList<>();
@@ -87,15 +86,7 @@ public class UserService {
 
         userTransaction.add(InitialTransactions);
         createdUser.setTransactions(userTransaction);
-//        var user = UserEntity.builder()
-//                .firstName(userDto.getFirstName())
-//                .lastName(userDto.getLastName())
-//                .email(userDto.getEmail())
-//                .accountNumber(accountNumber)
-//                .userId(user_Id)
-//                .password(passwordEncoder.encode(userDto.getPassword()))
-//                .role(request.getRole())
-//                .build();
+
         if (repository.findByAccountNumber(createdUser.getAccountNumber()).isPresent())
             throw new RuntimeException("User already exists");
         repository.save(createdUser);
@@ -103,17 +94,8 @@ public class UserService {
 
         AuthenticationResponse response  = modelMapper.map(createdUser, AuthenticationResponse.class);
         Link link = WebMvcLinkBuilder.linkTo(methodOn(UserController.class).getUser(createdUser.getUserId())).withRel("user");
-        response.setLink(link);
+        response.add(link);
 return response;
-//        return AuthenticationResponse.builder()
-//                .token(jwtToken)
-//                .userId(createdUser.getUserId())
-//                .firstName(request.getFirstName())
-//                .lastName(request.getLastName())
-//                .email(request.getEmail())
-//                .accountNumber(createdUser.getAccountNumber())
-//                .addresses(createdUser.getAddresses())
-//                .build();
     }
 
     public AuthenticationResponse authenticate(UserLoginRequest request) {
@@ -126,10 +108,6 @@ return response;
         var user = repository.findByEmail(request.getEmail())
                 .orElseThrow();
         var jwtToken = jwtService.generateToken(user);
-        var userid = copyProperties(request.getEmail());
-        //  var refreshToken = jwtService.generateRefreshToken(user);
-//        revokeAllUserTokens(user);
-//        saveUserToken(user, jwtToken);
         AuthenticationResponse response= AuthenticationResponse.builder()
                 .token(jwtToken)
                 .userId(user.getUserId())
@@ -137,28 +115,23 @@ return response;
                 .accountNumber(user.getAccountNumber())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
-             //   .addresses(user.getAddresses())
-                //   .refreshToken(refreshToken)
+
                 .build();
-        Link link =linkTo(methodOn(UserController.class).getUser(user.getUserId())).withRel("user");
-        response.setLink(link);
+        Link userLink =linkTo(methodOn(UserController.class).getUser(user.getUserId())).withRel("user");
+        Link transferLink =linkTo(UserController.class).slash("transfer").slash(user.getUserId()).withRel("user");
+        response.add(userLink);
+        response.add(transferLink);
         return response;
 
     }
 
-    public String copyProperties(String email) {
-        UserDto returnValue = new UserDto();
-        var user = repository.findByEmail(email);
-        BeanUtils.copyProperties(user, returnValue);
 
-        return returnValue.getUserId();
-    }
 
-    public TransferResponse transfer(TransferRequest request, String email) {
+    public TransferResponse transfer(TransferRequest request, String userId) {
 
-        var user = repository.findByEmail(email).orElseThrow();
+        var user = repository.findByUserId(userId).orElseThrow();
         var user2 = repository.findByAccountNumber(request.getAccountNumber()).orElseThrow();
-        if (repository.findByEmail(email).isEmpty())
+        if (repository.findByUserId(userId).isEmpty())
             throw new UserServiceException(ErrorMessages.RECORD_NOT_FOUND.getErrorMessage());
         if (repository.findByAccountNumber(request.getAccountNumber()).isEmpty())
             throw new UserServiceException(ErrorMessages.RECORD_NOT_FOUND.getErrorMessage());
@@ -180,13 +153,6 @@ return response;
         }
 
         if (request.getBalance() <= 0){
-//            Transactions transaction = new Transactions();
-//            transaction.setDetails("Failed, wrong input");
-//            transaction.setDate(String.valueOf(date));
-//            transaction.setUserDetails(user);
-//            transaction.setTransactionId(userUtils.generateTransactionId(10));
-//            user.getTransactions().add(transaction);
-
             return TransferResponse.builder()
 
                     .TransferStatus("Failed, wrong input")
@@ -268,54 +234,5 @@ return  null;
 
     }
 
-//
-//    private void saveUserToken(User user, String jwtToken) {
-//        var token = Token.builder()
-//                .user(user)
-//                .token(jwtToken)
-//                .tokenType(TokenType.BEARER)
-//                .expired(false)
-//                .revoked(false)
-//                .build();
-//        tokenRepository.save(token);
-//    }
-//
-//    private void revokeAllUserTokens(User user) {
-//        var validUserTokens = tokenRepository.findAllValidTokenByUser(user.getId());
-//        if (validUserTokens.isEmpty())
-//            return;
-//        validUserTokens.forEach(token -> {
-//            token.setExpired(true);
-//            token.setRevoked(true);
-//        });
-//        tokenRepository.saveAll(validUserTokens);
-//    }
-//
-//    public void refreshToken(
-//            HttpServletRequest request,
-//            HttpServletResponse response
-//    ) throws IOException {
-//        final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-//        final String refreshToken;
-//        final String userEmail;
-//        if (authHeader == null ||!authHeader.startsWith("Bearer ")) {
-//            return;
-//        }
-//        refreshToken = authHeader.substring(7);
-//        userEmail = jwtService.extractUsername(refreshToken);
-//        if (userEmail != null) {
-//            var user = this.repository.findByEmail(userEmail)
-//                    .orElseThrow();
-//            if (jwtService.isTokenValid(refreshToken, user)) {
-//                var accessToken = jwtService.generateToken(user);
-//                revokeAllUserTokens(user);
-//                saveUserToken(user, accessToken);
-//                var authResponse = AuthenticationResponse.builder()
-//                        .accessToken(accessToken)
-//                        .refreshToken(refreshToken)
-//                        .build();
-//                new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
-//            }
-//        }
-//    }
+
 }
