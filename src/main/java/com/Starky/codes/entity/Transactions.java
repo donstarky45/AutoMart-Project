@@ -13,7 +13,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "TransactionMain")
+@Table(name = "Transactions")
 public class Transactions implements Serializable {
     private static final Long serialVersionUID = 1L;
 
@@ -33,6 +33,6 @@ public class Transactions implements Serializable {
 
 
     @ManyToOne
-    @JoinColumn(name = "TutorialNew_id")
+    @JoinColumn(name = "users_id")
     private UserEntity userDetails;
 }

@@ -38,7 +38,7 @@ public class AddressEntity implements Serializable {
     private String billing;
 
     @ManyToOne
-    @JoinColumn(name = "TutorialNew_id")
+    @JoinColumn(name = "users_id")
     private UserEntity userDetails;
 
 }

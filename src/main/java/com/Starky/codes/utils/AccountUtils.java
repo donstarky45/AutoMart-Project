@@ -1,4 +1,4 @@
-package com.Starky.codes.generate;
+package com.Starky.codes.utils;
 
 import java.security.SecureRandom;
 import java.util.Random;

@@ -16,9 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 public class AuthenticationResponse extends EntityModel<AuthenticationResponse> {
 
-    //    @JsonProperty("access_token")
-//    private String accessToken;
-//    @JsonProperty("refresh_token")
+
     private String token;
     private String userId;
     private String firstName;

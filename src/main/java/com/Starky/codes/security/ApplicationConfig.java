@@ -2,8 +2,8 @@ package com.Starky.codes.security;
 
 
 
-import com.Starky.codes.generate.AccountUtils;
-import com.Starky.codes.generate.UserUtils;
+import com.Starky.codes.utils.AccountUtils;
+import com.Starky.codes.utils.UserUtils;
 import com.Starky.codes.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;

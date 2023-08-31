@@ -20,11 +20,11 @@ public class AuthController extends EntityModel<UserEntity> {
 
     private final UserService service;
 
-    @PostMapping("/register")
+    @PostMapping("/signUp")
     public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest request) {
         return ResponseEntity.ok(service.register(request));
     }
-    @PostMapping("/authenticate")
+    @PostMapping("/login")
     public  ResponseEntity<AuthenticationResponse> authenticate(@RequestBody UserLoginRequest request) {
         return ResponseEntity.ok(service.authenticate(request));
     }

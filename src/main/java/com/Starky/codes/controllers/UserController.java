@@ -3,10 +3,7 @@ package com.Starky.codes.controllers;
 
 
 
-import com.Starky.codes.response.AuthenticationResponse;
-import com.Starky.codes.response.DeleteResponse;
-import com.Starky.codes.response.PageModel;
-import com.Starky.codes.response.TransferResponse;
+import com.Starky.codes.response.*;
 import com.Starky.codes.service.UserService;
 import com.Starky.codes.userRequest.TransferRequest;
 import lombok.RequiredArgsConstructor;
@@ -42,4 +39,22 @@ public class UserController {
         return ResponseEntity.ok(service.getUsers(page,limit, pageable));
     }
 
+    @GetMapping(path = "/{userId}/transactions")
+    public ResponseEntity<List<TransactionResponse>> getTransactions(@PathVariable String userId){
+        return ResponseEntity.ok(service.getTransactions(userId));
+    }
+    @GetMapping(path = "/{userId}/transactions/{transactionId}")
+    public ResponseEntity<TransactionResponse> getTransaction(@PathVariable String userId, @PathVariable String transactionId ){
+        return ResponseEntity.ok(service.getTransaction(userId,transactionId));
+    }
+
+    @GetMapping(path = "/{userId}/addresses")
+    public ResponseEntity<List<AddressResponse>> getAddresses(@PathVariable String userId){
+        return ResponseEntity.ok(service.getAddresses(userId));
+    }
+
+    @GetMapping(path = "/{userId}/addresses/{addressId}")
+    public ResponseEntity<AddressResponse> getAddress(@PathVariable String userId, @PathVariable String addressId ){
+        return ResponseEntity.ok(service.getAddress(userId,addressId));
+    }
 }

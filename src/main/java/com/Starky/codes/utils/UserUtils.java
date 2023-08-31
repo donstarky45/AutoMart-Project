@@ -1,4 +1,4 @@
-package com.Starky.codes.generate;
+package com.Starky.codes.utils;
 
 import org.springframework.stereotype.Component;
 

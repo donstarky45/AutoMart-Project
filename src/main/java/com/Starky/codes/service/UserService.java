@@ -2,24 +2,26 @@ package com.Starky.codes.service;
 
 
 import com.Starky.codes.controllers.UserController;
+import com.Starky.codes.entity.AddressEntity;
 import com.Starky.codes.entity.Transactions;
 import com.Starky.codes.exceptions.ErrorMessages;
 import com.Starky.codes.exceptions.UserServiceException;
+import com.Starky.codes.repository.AddressRepository;
+import com.Starky.codes.repository.TransactionsRepository;
 import com.Starky.codes.response.*;
 import com.Starky.codes.shared.AddressDTO;
-
 import com.Starky.codes.security.JwtService;
-import com.Starky.codes.generate.AccountUtils;
-import com.Starky.codes.generate.UserUtils;
+import com.Starky.codes.utils.AccountUtils;
+import com.Starky.codes.utils.UserUtils;
 import com.Starky.codes.entity.UserEntity;
 import com.Starky.codes.repository.UserRepository;
 import com.Starky.codes.shared.UserDto;
-
 import com.Starky.codes.userRequest.RegisterRequest;
 import com.Starky.codes.userRequest.TransferRequest;
 import com.Starky.codes.userRequest.UserLoginRequest;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -31,7 +33,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -40,6 +41,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository repository;
+    private final AddressRepository addressRepository;
+    private final TransactionsRepository transactionsRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
@@ -49,7 +52,6 @@ public class UserService {
     private final Date date;
 
     public AuthenticationResponse register(RegisterRequest request) {
-
 
 
         ModelMapper modelMapper = new ModelMapper();
@@ -69,7 +71,6 @@ public class UserService {
         }
 
 
-
         UserEntity createdUser = modelMapper.map(userDto, UserEntity.class);
         createdUser.setUserId(userUtils.generateUserId(15));
         createdUser.setAccountNumber(accountUtils.generate(10));
@@ -79,7 +80,7 @@ public class UserService {
         List<Transactions> userTransaction = new ArrayList<>();
         Transactions InitialTransactions = new Transactions();
 
-            InitialTransactions.setDetails("User Created with email " + request.getEmail());
+        InitialTransactions.setDetails("User Created with email " + request.getEmail());
         InitialTransactions.setDate(String.valueOf(date));
         InitialTransactions.setTransactionId(userUtils.generateTransactionId(10));
         InitialTransactions.setUserDetails(createdUser);
@@ -92,10 +93,10 @@ public class UserService {
         repository.save(createdUser);
         var jwtToken = jwtService.generateToken(createdUser);
 
-        AuthenticationResponse response  = modelMapper.map(createdUser, AuthenticationResponse.class);
+        AuthenticationResponse response = modelMapper.map(createdUser, AuthenticationResponse.class);
         Link link = WebMvcLinkBuilder.linkTo(methodOn(UserController.class).getUser(createdUser.getUserId())).withRel("user");
         response.add(link);
-return response;
+        return response;
     }
 
     public AuthenticationResponse authenticate(UserLoginRequest request) {
@@ -108,7 +109,7 @@ return response;
         var user = repository.findByEmail(request.getEmail())
                 .orElseThrow();
         var jwtToken = jwtService.generateToken(user);
-        AuthenticationResponse response= AuthenticationResponse.builder()
+        AuthenticationResponse response = AuthenticationResponse.builder()
                 .token(jwtToken)
                 .userId(user.getUserId())
                 .email(user.getEmail())
@@ -117,27 +118,28 @@ return response;
                 .lastName(user.getLastName())
 
                 .build();
-        Link userLink =linkTo(methodOn(UserController.class).getUser(user.getUserId())).withRel("user");
-        Link transferLink =linkTo(UserController.class).slash("transfer").slash(user.getUserId()).withRel("user");
+        Link userLink = linkTo(methodOn(UserController.class).getUser(user.getUserId())).withRel("user");
+        Link transferLink = linkTo(UserController.class).slash("transfer").slash(user.getUserId()).withRel("user");
+        Link transactionsLink = linkTo(UserController.class).slash(user.getUserId()).slash("transactions").withRel("user");
         response.add(userLink);
         response.add(transferLink);
+        response.add(transactionsLink);
         return response;
 
     }
 
 
-
     public TransferResponse transfer(TransferRequest request, String userId) {
 
-        var user = repository.findByUserId(userId).orElseThrow();
-        var user2 = repository.findByAccountNumber(request.getAccountNumber()).orElseThrow();
-        if (repository.findByUserId(userId).isEmpty())
+        UserEntity user = repository.findByUserId(userId);
+        UserEntity user2 = repository.findByAccountNumber(request.getAccountNumber()).orElseThrow();
+        if (repository.findByUserId(userId) == null)
             throw new UserServiceException(ErrorMessages.RECORD_NOT_FOUND.getErrorMessage());
         if (repository.findByAccountNumber(request.getAccountNumber()).isEmpty())
             throw new UserServiceException(ErrorMessages.RECORD_NOT_FOUND.getErrorMessage());
-        if (user.getBalance() < request.getBalance()){
+        if (user.getBalance() < request.getBalance()) {
             Transactions transaction = new Transactions();
-            transaction.setDetails(" Failed, insufficient Funds! Transfer of " + request.getBalance() + " to " + user2.getFirstName()+ " "+ user2.getLastName());
+            transaction.setDetails(" Failed, insufficient Funds! Transfer of " + request.getBalance() + " to " + user2.getFirstName() + " " + user2.getLastName());
             transaction.setDate(String.valueOf(date));
             transaction.setUserDetails(user);
             transaction.setTransactionId(userUtils.generateTransactionId(10));
@@ -147,69 +149,66 @@ return response;
 
             return TransferResponse.builder()
 
-                    .TransferStatus( " Failed, insufficient Funds! Transfer of " + request.getBalance() + " to " + user2.getFirstName()+ " "+ user2.getLastName())
+                    .TransferStatus(" Failed, insufficient Funds! Transfer of " + request.getBalance() + " to " + user2.getFirstName() + " " + user2.getLastName())
                     .build();
-          //  throw new UserServiceException(ErrorMessages.INSUFFICIENT_FUNDS.getErrorMessage());
         }
 
-        if (request.getBalance() <= 0){
+        if (request.getBalance() <= 0) {
             return TransferResponse.builder()
 
                     .TransferStatus("Failed, wrong input")
                     .build();
-          //  throw new UserServiceException(ErrorMessages.INVALID_VALUE.getErrorMessage());
+
         }
-if(request.getBalance() >0 && user.getBalance() >= request.getBalance()) {
-    user.setBalance(user.getBalance() - request.getBalance());
-    user2.setBalance(user2.getBalance() + request.getBalance());
+        if (request.getBalance() > 0 && user.getBalance() >= request.getBalance()) {
+            user.setBalance(user.getBalance() - request.getBalance());
+            user2.setBalance(user2.getBalance() + request.getBalance());
 
-    Transactions transaction = new Transactions();
-    transaction.setDetails("Transfer to " + user2.getFirstName() + " " + user2.getLastName() + " Successful. Amount " + String.valueOf(request.getBalance()));
-    transaction.setDate(String.valueOf(date));
-    transaction.setUserDetails(user);
-    transaction.setTransactionId(userUtils.generateTransactionId(10));
-    user.getTransactions().add(transaction);
+            Transactions transaction = new Transactions();
+            transaction.setDetails("Transfer to " + user2.getFirstName() + " " + user2.getLastName() + " Successful. Amount " + String.valueOf(request.getBalance()));
+            transaction.setDate(String.valueOf(date));
+            transaction.setUserDetails(user);
+            transaction.setTransactionId(userUtils.generateTransactionId(10));
+            user.getTransactions().add(transaction);
 
-    Transactions transaction2 = new Transactions();
-    transaction2.setDetails("Transfer from " + user.getFirstName() + " " + user.getLastName() + " Successful. Amount " + String.valueOf(request.getBalance()));
-    transaction2.setDate(String.valueOf(date));
-    transaction2.setUserDetails(user2);
-    transaction2.setTransactionId(userUtils.generateTransactionId(10));
-    user.getTransactions().add(transaction);
-    user2.getTransactions().add(transaction2);
+            Transactions transaction2 = new Transactions();
+            transaction2.setDetails("Transfer from " + user.getFirstName() + " " + user.getLastName() + " Successful. Amount " + String.valueOf(request.getBalance()));
+            transaction2.setDate(String.valueOf(date));
+            transaction2.setUserDetails(user2);
+            transaction2.setTransactionId(userUtils.generateTransactionId(10));
+            user.getTransactions().add(transaction);
+            user2.getTransactions().add(transaction2);
 
-    repository.save(user);
-    repository.save(user2);
+            repository.save(user);
+            repository.save(user2);
 
-    return TransferResponse.builder()
+            return TransferResponse.builder()
 
-            .TransferStatus(" You have successfully sent " + String.valueOf(request.getBalance())
-                    + " to " + user2.getFirstName()
-                    + " Your balance is " + String.valueOf(user.getBalance()))
-            .build();
-}
-
-
-return  null;
+                    .TransferStatus(" You have successfully sent " + String.valueOf(request.getBalance())
+                            + " to " + user2.getFirstName()
+                            + " Your balance is " + String.valueOf(user.getBalance()))
+                    .build();
+        }
+        return null;
     }
 
     public AuthenticationResponse getUser(String userId) {
-        if (repository.findByUserId(userId).isEmpty()) throw new RuntimeException("User not found");
-        var user = repository.findByUserId(userId);
+        if (repository.findByUserId(userId) == null) throw new RuntimeException("User not found");
+        UserEntity user = repository.findByUserId(userId);
         return AuthenticationResponse.builder()
-                .firstName(user.get().getFirstName())
-                .lastName(user.get().getLastName())
-                .userId(user.get().getUserId())
-                .email(user.get().getEmail())
-                .accountNumber(user.get().getAccountNumber())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .userId(user.getUserId())
+                .email(user.getEmail())
+                .accountNumber(user.getAccountNumber())
                 .token("UNAVAILABLE")
                 .build();
     }
 
     public DeleteResponse deleteUser(String userId) {
-        if (repository.findByUserId(userId).isEmpty()) throw new RuntimeException("User not found");
-        var user = repository.findByUserId(userId);
-        repository.delete(user.get());
+        if (repository.findByUserId(userId) == null) throw new RuntimeException("User not found");
+        UserEntity user = repository.findByUserId(userId);
+        repository.delete(user);
         return DeleteResponse.builder()
                 .operationalName(OperationalName.DELETE.name())
                 .operationalResult(OperationalResult.SUCCESS.name())
@@ -234,5 +233,84 @@ return  null;
 
     }
 
+    public List<TransactionResponse> getTransactions(String userId) {
+        if (repository.findByUserId(userId) == null) throw new RuntimeException("User not found");
+        List<TransactionResponse> returnValue = new ArrayList<>();
+
+        ModelMapper modelMapper = new ModelMapper();
+
+        UserEntity userEntity = repository.findByUserId(userId);
+        Iterable<Transactions> transactionsList = transactionsRepository.findAllByUserDetails(userEntity);
+        List<Transactions> transactions = transactionsRepository.findAllByUserDetails(userEntity);
+        if (transactionsList != null) {
+            java.lang.reflect.Type listType = new TypeToken<List<TransactionResponse>>() {
+            }.getType();
+            returnValue = new ModelMapper().map(transactionsList, listType);
+        }
+        for (int i = 0; i < transactions.size(); i++) {
+            Link transactionLink = linkTo(UserController.class).slash(userEntity.getUserId()).slash("transactions").slash(transactions.get(i).getTransactionId()).withRel("user");
+            returnValue.get(i).add(transactionLink);
+        }
+
+        return returnValue;
+    }
+
+    public TransactionResponse getTransaction(String userId, String transactionId) {
+        if (repository.findByUserId(userId) == null) throw new RuntimeException("User not found");
+        TransactionResponse returnValue = new TransactionResponse();
+
+        ModelMapper modelMapper = new ModelMapper();
+
+        if (repository.findByUserId(userId) == null)
+            throw new UserServiceException(ErrorMessages.RECORD_NOT_FOUND.getErrorMessage());
+        Transactions transaction = transactionsRepository.findByTransactionId(transactionId);
+
+
+        returnValue = new ModelMapper().map(transaction, TransactionResponse.class);
+        Link transactionsLink = linkTo(UserController.class).slash(userId).slash("transactions").withRel("user");
+        returnValue.add(transactionsLink);
+
+        return returnValue;
+    }
+
+
+    public List<AddressResponse> getAddresses(String userId) {
+        if (repository.findByUserId(userId) == null) throw new RuntimeException("User not found");
+        List<AddressResponse> returnValue = new ArrayList<>();
+
+        ModelMapper modelMapper = new ModelMapper();
+
+        UserEntity userEntity = repository.findByUserId(userId);
+        Iterable<AddressEntity> addressEntities = addressRepository.findAllByUserDetails(userEntity);
+
+        List<AddressEntity> addressEntity = addressRepository.findAllByUserDetails(userEntity);
+        if (addressEntities != null) {
+            java.lang.reflect.Type listType = new TypeToken<List<AddressResponse>>() {
+            }.getType();
+            returnValue = new ModelMapper().map(addressEntities, listType);
+        }
+        for (int i = 0; i < addressEntity.size(); i++) {
+            Link transactionLink = linkTo(UserController.class).slash(userEntity.getUserId()).slash("addresses").slash(addressEntity.get(i).getAddressId()).withRel("user");
+            returnValue.get(i).add(transactionLink);
+        }
+
+        return returnValue;
+    }
+
+    public AddressResponse getAddress(String userId, String addressId) {
+        if (repository.findByUserId(userId) == null) throw new RuntimeException("User not found");
+        AddressResponse returnValue = new AddressResponse();
+
+        ModelMapper modelMapper = new ModelMapper();
+
+        if (repository.findByUserId(userId) == null)
+            throw new UserServiceException(ErrorMessages.RECORD_NOT_FOUND.getErrorMessage());
+        AddressEntity addressEntity = addressRepository.findByAddressId(addressId);
+        returnValue = new ModelMapper().map(addressEntity, AddressResponse.class);
+        Link transactionsLink = linkTo(UserController.class).slash(userId).slash("addresses").withRel("user");
+        returnValue.add(transactionsLink);
+
+        return returnValue;
+    }
 
 }
