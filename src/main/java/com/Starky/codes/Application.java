@@ -1,5 +1,6 @@
 package com.Starky.codes;
 
+import com.Starky.codes.userRequest.RegisterRequest;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -17,4 +18,5 @@ public class Application {
 	public Date date(){
 		return new Date();
 	}
+
 }

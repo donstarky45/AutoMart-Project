@@ -23,4 +23,5 @@ public class AddressDTO implements Serializable {
     private String postalCode;
     private String billing;
     private UserDto userDetails;
+
 }

@@ -5,16 +5,28 @@ package com.Starky.codes.security;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
+
+import static com.Starky.codes.entity.Permission.*;
+import static com.Starky.codes.entity.Role.ADMIN;
+import static com.Starky.codes.entity.Role.USER;
+import static org.springframework.http.HttpMethod.*;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+@EnableMethodSecurity
 public class SecurityConfiguration {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
@@ -25,13 +37,33 @@ public class SecurityConfiguration {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(c ->c.disable())
-                .authorizeHttpRequests(auth -> auth  .requestMatchers("/api/v1/auth/**")
-                        .permitAll().anyRequest()
+                .authorizeHttpRequests(auth -> auth.requestMatchers("/api/v1/auth/**", "/h2-console/**","/api/v1/admin/**").permitAll()
+                      //  .requestMatchers(new NegatedRequestMatcher(new AntPathRequestMatcher(("/api/v1/admin/**")))).hasAnyRole(ADMIN.name())
+
+//                                .requestMatchers(GET, "/api/v1/admin/**").hasAuthority(ADMIN_READ.name())
+//                                .requestMatchers(POST, "/api/v1/admin/**").hasAuthority(ADMIN_CREATE.name())
+//                                .requestMatchers(PUT, "/api/v1/admin/**").hasAuthority(ADMIN_UPDATE.name())
+//                                .requestMatchers(DELETE, "/api/v1/admin/**").hasAuthority(ADMIN_DELETE.name())
+                        .anyRequest()
                         .authenticated())
+             //   .authorizeHttpRequests(auth -> auth).anyRequest().authenticated())
+//                .headers(h->h.frameOptions(frameOptionsConfig -> frameOptionsConfig.disable()))
                 .sessionManagement(s->s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+
+
+
+        }
+
+
+//    public void configure(WebSecurity web) {
+//        web.ignoring().requestMatchers(new NegatedRequestMatcher(new AntPathRequestMatcher("/h2-console/**")));
+//    }
+
+//.authorizeHttpRequests(auth -> auth.requestMatchers(new NegatedRequestMatcher(new AntPathRequestMatcher( "/api/v1/auth/**","/h2-console/**")))
+
+
     }
-}
