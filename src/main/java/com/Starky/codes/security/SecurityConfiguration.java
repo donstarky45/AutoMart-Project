@@ -65,5 +65,5 @@ public class SecurityConfiguration {
 
 //.authorizeHttpRequests(auth -> auth.requestMatchers(new NegatedRequestMatcher(new AntPathRequestMatcher( "/api/v1/auth/**","/h2-console/**")))
 
-
+//
     }
