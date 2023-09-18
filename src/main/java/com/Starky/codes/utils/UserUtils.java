@@ -16,6 +16,10 @@ public class UserUtils {
     public String generateAdressId(int length){
         return generateRandomString(length);
     }
+
+    public String generateSubscriptionId(int length){
+        return generateRandomString(length);
+    }
     public String generateTransactionId(int length){
         return generateRandomString(length);
     }

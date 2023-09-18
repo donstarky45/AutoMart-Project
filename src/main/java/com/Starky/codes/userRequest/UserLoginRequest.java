@@ -16,7 +16,7 @@ public class UserLoginRequest {
 
     private String email;
     String password;
-   // private List<AddressRequest> addressRequests;
+
 
 
 }

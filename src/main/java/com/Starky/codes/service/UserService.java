@@ -12,7 +12,7 @@ import java.util.List;
 public interface UserService {
 
     AuthenticationResponse signup(RegisterRequest request);
-   AuthenticationResponse signupAdmin(AdminRegisterRequest request);
+  // AuthenticationResponse signupAdmin(AdminRegisterRequest request);
     AuthenticationResponse login(UserLoginRequest request);
     TransferResponse transfer(TransferRequest request, String userId);
     AuthenticationResponse getUser(String userId);
@@ -23,4 +23,7 @@ public interface UserService {
     List<AddressResponse> getAddresses(String userId);
     AddressResponse getAddress(String userId, String addressId);
     UserUpdateDto updateUser(String userId, UserUpdateDto user);
+  OperationalResult subscribe(String userId, String adminId);
+
+  OperationalResult unSubscribe(String userId, String adminId);
 }

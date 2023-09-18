@@ -75,6 +75,12 @@ public class UserController {
 
         return returnValue;
     }
-
-
+    @PutMapping(path = "/{userId}/subscribe/{adminId}")
+    public ResponseEntity<OperationalResult> subscribe( @PathVariable String userId,@PathVariable String adminId) {
+        return ResponseEntity.ok(userService.subscribe(userId,adminId));
+    }
+    @DeleteMapping (path = "/{userId}/unsubscribe/{subscriptionId}")
+    public ResponseEntity<OperationalResult> unSubscribe( @PathVariable String userId,@PathVariable String subscriptionId) {
+        return ResponseEntity.ok(userService.unSubscribe(userId,subscriptionId));
+    }
 }
