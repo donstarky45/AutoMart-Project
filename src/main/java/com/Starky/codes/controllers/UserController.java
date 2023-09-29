@@ -8,6 +8,8 @@ import com.Starky.codes.service.UserService;
 import com.Starky.codes.shared.UserUpdateDto;
 import com.Starky.codes.userRequest.TransferRequest;
 import com.Starky.codes.userRequest.UserUpdateRequest;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,11 +77,33 @@ public class UserController {
 
         return returnValue;
     }
-    @PutMapping(path = "/{userId}/subscribe/{adminId}")
-    public ResponseEntity<OperationalResult> subscribe( @PathVariable String userId,@PathVariable String adminId) {
-        return ResponseEntity.ok(userService.subscribe(userId,adminId));
+    @PutMapping(path = "/{userId}/subscribe/{Id}")
+    @Operation(
+            description = "Put endpoint for Admin and Users",
+            summary = "Admins and  Users Can Subscribe to each other",
+            responses = {
+                    @ApiResponse(
+                            description = "Subscribed",
+                            responseCode = "200"
+                    )
+            }
+
+    )
+    public ResponseEntity<OperationalResult> subscribe( @PathVariable String userId,@PathVariable String Id) {
+        return ResponseEntity.ok(userService.subscribe(userId,Id));
     }
     @DeleteMapping (path = "/{userId}/unsubscribe/{subscriptionId}")
+    @Operation(
+            description = "Delete endpoint for Admin and Users",
+            summary = "Admins and  Users Can Unsubscribe from each other",
+            responses = {
+                    @ApiResponse(
+                            description = "Unsubscribed",
+                            responseCode = "200"
+                    )
+            }
+
+    )
     public ResponseEntity<OperationalResult> unSubscribe( @PathVariable String userId,@PathVariable String subscriptionId) {
         return ResponseEntity.ok(userService.unSubscribe(userId,subscriptionId));
     }

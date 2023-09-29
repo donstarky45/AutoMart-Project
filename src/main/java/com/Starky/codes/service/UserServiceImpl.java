@@ -353,12 +353,12 @@ if(repository.findByUserId(userId) == null|| repository.findByUserId(adminId) ==
             .build();
 
     for(SubscribedUsers subscribedUsers: user2.getSubscribedUsers()){
-        if(subscribedUsers.getUserId().equals(userId)) throw new UserServiceException(ErrorMessages.RECORD_ALREADY_EXISTS.getErrorMessage());
+        if(subscribedUsers.getUserId().equals(userId)) throw new UserServiceException(ErrorMessages.ALREADY_SUBSCRIBED.getErrorMessage());
     }
 
     user2.getSubscribedUsers().add(subscribedUser);
     subscribedUsersRepository.save(subscribedUser);
-return OperationalResult.SUCCESS;
+return OperationalResult.SUBSCRIBED;
 }
 
     public OperationalResult unSubscribe(String userId,String subscriptionId){
@@ -369,7 +369,7 @@ if(user == null || subscribedUsers == null) throw new UserServiceException(Error
 if(user.getUserId().equals(subscribedUsers.getUserId())){
 
     subscribedUsersRepository.delete(subscribedUsers);
-    return OperationalResult.SUCCESS;
+    return OperationalResult.UNSUBSCRIBED;
 }
 
         return OperationalResult.ERROR;
