@@ -28,25 +28,32 @@ public class UserEntity extends RepresentationModel<UserEntity> implements UserD
     @Id
     @GeneratedValue
     private Integer id;
+
     @Column(nullable = false)
     private String firstName;
+
     @Column(nullable = false)
     private String lastName;
     @Column(nullable = false)
     private String email;
+
     private String emailVerificationToken;
+
     @Column(nullable = false)
     private boolean emailVerificationStatus = false;
+
     @Column(nullable = false)
     private String userId;
+    @Column(nullable = false)
     private String password;
-    @Column(unique = true, nullable = false)
-    private String accountNumber;
-private double balance;
+
+
+
     @Enumerated(EnumType.STRING)
     private Role role;
-    @OneToMany(mappedBy=("userDetails"), cascade=CascadeType.ALL)
-    private List<AddressEntity> addresses;
+
+    @Column(nullable = false)
+    private String address;
 
     @OneToMany(mappedBy=("userDetails"), cascade=CascadeType.ALL)
     private List<Transactions> transactions;
@@ -57,11 +64,10 @@ private double balance;
 
 
 
-    @OneToMany(mappedBy=("userId"), cascade=CascadeType.ALL)
+    @OneToMany(mappedBy=("owner"), cascade=CascadeType.ALL)
     private List<Car> cars;
 
-    @OneToMany(mappedBy=("userId"), cascade=CascadeType.ALL)
-    private List<CarAD> carADS;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return role.getAuthorities();

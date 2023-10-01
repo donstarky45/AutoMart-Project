@@ -13,6 +13,10 @@ public class UserUtils {
     public String generateUserId(int length){
         return generateRandomString(length);
     }
+
+    public String generateCarId(int length){
+        return generateRandomString(length);
+    }
     public String generateAdressId(int length){
         return generateRandomString(length);
     }

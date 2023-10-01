@@ -2,10 +2,8 @@ package com.automart.controllers;
 
 
 import com.automart.response.DeleteResponse;
-import com.automart.response.TransferResponse;
 import com.automart.service.AdminService;
 import com.automart.service.UserService;
-import com.automart.userRequest.TransferRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;

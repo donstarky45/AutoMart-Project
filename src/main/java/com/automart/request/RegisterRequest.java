@@ -1,29 +1,23 @@
-package com.automart.response;
+package com.automart.request;
 
 
+import com.automart.entity.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.hateoas.EntityModel;
-
-import java.util.List;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuthenticationResponse extends EntityModel<AuthenticationResponse> {
+public class RegisterRequest {
 
-
-    private String token;
-    private String userId;
     private String firstName;
     private String lastName;
     private String email;
+    private String password;
     private String address;
-
-
-
+    private Role role = Role.USER;
 
 }

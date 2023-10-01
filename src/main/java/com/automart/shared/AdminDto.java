@@ -1,2 +1,31 @@
-package com.automart.shared;public class AdminDto {
+package com.automart.shared;
+
+import com.automart.entity.Role;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+
+import java.io.Serializable;
+
+public class AdminDto implements Serializable {
+
+
+    private static final Long serialVersionUID = 1L;
+
+    private Integer id;
+    private String firstName;
+    private String lastName;
+    private String email;
+    private String emailVerificationToken;
+    private boolean emailVerificationStatus = false;
+    private String userId;
+    private String password;
+    private String address;
+    private double balance;
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
+
+
+
+
 }

@@ -1,4 +1,4 @@
-package com.automart.userRequest;
+package com.automart.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

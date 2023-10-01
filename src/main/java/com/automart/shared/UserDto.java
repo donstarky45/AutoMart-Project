@@ -27,12 +27,11 @@ public class UserDto implements Serializable {
     private boolean emailVerificationStatus = false;
     private String userId;
     private String password;
-    private String accountNumber;
+    private String address;
     private double balance;
     @Enumerated(EnumType.STRING)
     private Role role;
-    private List<AddressDTO> addresses;
-//    private List<TransactionDto> transactions;
+
 
 
 

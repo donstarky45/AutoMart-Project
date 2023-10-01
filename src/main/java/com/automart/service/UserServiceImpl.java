@@ -2,23 +2,20 @@ package com.automart.service;
 
 
 import com.automart.controllers.UserController;
-import com.automart.entity.AddressEntity;
+import com.automart.entity.Car;
 import com.automart.entity.Transactions;
 import com.automart.exceptions.ErrorMessages;
 import com.automart.exceptions.UserServiceException;
-import com.automart.repository.AddressRepository;
 import com.automart.repository.CarRepository;
 import com.automart.repository.TransactionsRepository;
 
 import com.automart.response.*;
-import com.automart.shared.AddressDTO;
 import com.automart.security.JwtService;
 
-import com.automart.userRequest.RegisterRequest;
-import com.automart.userRequest.TransferRequest;
-import com.automart.userRequest.UserLoginRequest;
-import com.automart.userRequest.UserUpdateRequest;
-import com.automart.utils.AccountUtils;
+import com.automart.request.CarPostRequest;
+import com.automart.request.RegisterRequest;
+import com.automart.request.UserLoginRequest;
+import com.automart.request.UserUpdateRequest;
 import com.automart.utils.UserUtils;
 import com.automart.entity.UserEntity;
 import com.automart.repository.UserRepository;
@@ -46,14 +43,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository repository;
-    private final AddressRepository addressRepository;
+
   private final CarRepository carRepository;
     private final TransactionsRepository transactionsRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
     private final AuthenticationManager authenticationManager;
-    private final AccountUtils accountUtils;
+
     private final UserUtils userUtils;
     private final Date date;
 
@@ -67,20 +64,12 @@ public class UserServiceImpl implements UserService {
 
         if (repository.findByEmail(userDto.getEmail()).isPresent()) throw new RuntimeException("User already exists");
 
-        for (int i = 0; i < request.getAddresses().size(); i++) {
 
-            AddressDTO addressDTO = userDto.getAddresses().get(i);
-            addressDTO.setUserDetails(userDto);
-            addressDTO.setAddressId(userUtils.generateAdressId(15));
-            userDto.getAddresses().set(i, addressDTO);
-
-        }
 
 
         UserEntity createdUser = modelMapper.map(userDto, UserEntity.class);
         createdUser.setUserId(userUtils.generateUserId(15));
-        createdUser.setAccountNumber(accountUtils.generate(10));
-        createdUser.setBalance(50000);
+        createdUser.setAddress(request.getAddress());
         createdUser.setPassword(passwordEncoder.encode(createdUser.getPassword()));
 
         List<Transactions> userTransaction = new ArrayList<>();
@@ -94,8 +83,7 @@ public class UserServiceImpl implements UserService {
         userTransaction.add(InitialTransactions);
         createdUser.setTransactions(userTransaction);
 
-        if (repository.findByAccountNumber(createdUser.getAccountNumber()).isPresent())
-            throw new RuntimeException("User already exists");
+
         repository.save(createdUser);
         var jwtToken = jwtService.generateToken(createdUser);
 
@@ -124,7 +112,7 @@ public class UserServiceImpl implements UserService {
                 .token(jwtToken)
                 .userId(user.getUserId())
                 .email(user.getEmail())
-                .accountNumber(user.getAccountNumber())
+                .address(user.getAddress())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
 
@@ -141,68 +129,7 @@ public class UserServiceImpl implements UserService {
     }
 
 
-    public TransferResponse transfer(TransferRequest request, String userId) {
 
-        UserEntity user = repository.findByUserId(userId);
-        UserEntity user2 = repository.findByAccountNumber(request.getAccountNumber()).orElseThrow();
-        if (repository.findByUserId(userId) == null)
-            throw new UserServiceException(ErrorMessages.RECORD_NOT_FOUND.getErrorMessage());
-        if (repository.findByAccountNumber(request.getAccountNumber()).isEmpty())
-            throw new UserServiceException(ErrorMessages.RECORD_NOT_FOUND.getErrorMessage());
-        if (user.getBalance() < request.getBalance()) {
-            Transactions transaction = new Transactions();
-            transaction.setDetails(" Failed, insufficient Funds! Transfer of " + request.getBalance() + " to " + user2.getFirstName() + " " + user2.getLastName());
-            transaction.setDate(String.valueOf(date));
-            transaction.setUserDetails(user);
-            transaction.setTransactionId(userUtils.generateTransactionId(10));
-            user.getTransactions().add(transaction);
-            repository.save(user);
-            repository.save(user2);
-
-            return TransferResponse.builder()
-
-                    .TransferStatus(" Failed, insufficient Funds! Transfer of " + request.getBalance() + " to " + user2.getFirstName() + " " + user2.getLastName())
-                    .build();
-        }
-
-        if (request.getBalance() <= 0) {
-            return TransferResponse.builder()
-
-                    .TransferStatus("Failed, wrong input")
-                    .build();
-
-        }
-        if (request.getBalance() > 0 && user.getBalance() >= request.getBalance()) {
-            user.setBalance(user.getBalance() - request.getBalance());
-            user2.setBalance(user2.getBalance() + request.getBalance());
-
-            Transactions transaction = new Transactions();
-            transaction.setDetails("Transfer to " + user2.getFirstName() + " " + user2.getLastName() + " Successful. Amount " + String.valueOf(request.getBalance()));
-            transaction.setDate(String.valueOf(date));
-            transaction.setUserDetails(user);
-            transaction.setTransactionId(userUtils.generateTransactionId(10));
-            user.getTransactions().add(transaction);
-
-            Transactions transaction2 = new Transactions();
-            transaction2.setDetails("Transfer from " + user.getFirstName() + " " + user.getLastName() + " Successful. Amount " + String.valueOf(request.getBalance()));
-            transaction2.setDate(String.valueOf(date));
-            transaction2.setUserDetails(user2);
-            transaction2.setTransactionId(userUtils.generateTransactionId(10));
-            user.getTransactions().add(transaction);
-            user2.getTransactions().add(transaction2);
-
-            repository.save(user);
-            repository.save(user2);
-
-            return TransferResponse.builder()
-
-                    .TransferStatus(" You have successfully sent " + String.valueOf(request.getBalance())
-                            + " to " + user2.getFirstName()
-                            + " Your balance is " + String.valueOf(user.getBalance()))
-                    .build();
-        }
-        return null;
-    }
 
     public AuthenticationResponse getUser(String userId) {
         if (repository.findByUserId(userId) == null) throw new RuntimeException("User not found");
@@ -212,7 +139,7 @@ public class UserServiceImpl implements UserService {
                 .lastName(user.getLastName())
                 .userId(user.getUserId())
                 .email(user.getEmail())
-                .accountNumber(user.getAccountNumber())
+                .address(user.getAddress())
                 .token("UNAVAILABLE")
                 .build();
     }
@@ -286,44 +213,8 @@ public class UserServiceImpl implements UserService {
     }
 
 
-    public List<AddressResponse> getAddresses(String userId) {
-        if (repository.findByUserId(userId) == null) throw new RuntimeException("User not found");
-        List<AddressResponse> returnValue = new ArrayList<>();
 
-        ModelMapper modelMapper = new ModelMapper();
 
-        UserEntity userEntity = repository.findByUserId(userId);
-        Iterable<AddressEntity> addressEntities = addressRepository.findAllByUserDetails(userEntity);
-
-        List<AddressEntity> addressEntity = addressRepository.findAllByUserDetails(userEntity);
-        if (addressEntities != null) {
-            java.lang.reflect.Type listType = new TypeToken<List<AddressResponse>>() {
-            }.getType();
-            returnValue = new ModelMapper().map(addressEntities, listType);
-        }
-        for (int i = 0; i < addressEntity.size(); i++) {
-            Link transactionLink = linkTo(UserController.class).slash(userEntity.getUserId()).slash("addresses").slash(addressEntity.get(i).getAddressId()).withRel("user");
-            returnValue.get(i).add(transactionLink);
-        }
-
-        return returnValue;
-    }
-
-    public AddressResponse getAddress(String userId, String addressId) {
-        if (repository.findByUserId(userId) == null) throw new RuntimeException("User not found");
-        AddressResponse returnValue = new AddressResponse();
-
-        ModelMapper modelMapper = new ModelMapper();
-
-        if (repository.findByUserId(userId) == null)
-            throw new UserServiceException(ErrorMessages.RECORD_NOT_FOUND.getErrorMessage());
-        AddressEntity addressEntity = addressRepository.findByAddressId(addressId);
-        returnValue = new ModelMapper().map(addressEntity, AddressResponse.class);
-        Link transactionsLink = linkTo(UserController.class).slash(userId).slash("addresses").withRel("user");
-        returnValue.add(transactionsLink);
-
-        return returnValue;
-    }
 
     public UpdateResponse updateUser(String userId, UserUpdateRequest userDetails) {
 
@@ -345,7 +236,40 @@ public class UserServiceImpl implements UserService {
 
     }
 
+   public CarAdsResponse postAd(CarPostRequest request, String id){
+UserEntity owner = repository.findByUserId(id);
 
+if (owner == null) throw new UserServiceException(ErrorMessages.RECORD_NOT_FOUND.getErrorMessage());
+
+       Car car = Car.builder()
+               .carId(userUtils.generateCarId(10))
+               .bodyType(request.getBodyType())
+               .owner(owner)
+               .createdOn(date)
+               .image(request.getImage())
+               .model(request.getModel())
+               .manufacturer(request.getManufacturer())
+               .state(request.getState())
+               .status(Constants.AVAILABLE.getMessage())
+               .price(request.getPrice())
+               .build();
+       carRepository.save(car);
+       owner.getCars().add(car);
+
+       return CarAdsResponse.builder()
+               .response(Messages.POSTED.getMessage())
+               .carId(car.getCarId())
+               .bodyType(car.getBodyType())
+               .createdOn(car.getCreatedOn())
+               .image(car.getImage())
+               .model(car.getModel())
+               .manufacturer(car.getManufacturer())
+               .state(car.getState())
+               .status(car.getStatus())
+               .price(car.getPrice())
+               .build();
+
+   }
 
 
 }

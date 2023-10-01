@@ -1,12 +1,10 @@
-package com.automart.userRequest;
+package com.automart.request;
 
 
 
 
 
 import lombok.*;
-
-import java.util.List;
 
 @Data
 @Builder
