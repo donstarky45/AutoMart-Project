@@ -1,7 +1,6 @@
 package com.automart.response;
 
 
-import com.automart.entity.AddressEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,8 +21,8 @@ public class AuthenticationResponse extends EntityModel<AuthenticationResponse> 
     private String firstName;
     private String lastName;
     private String email;
-    private String accountNumber;
-    private List<AddressEntity> addresses;
+    private String address;
+
 
 
 

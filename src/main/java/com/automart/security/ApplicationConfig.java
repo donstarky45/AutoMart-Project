@@ -2,7 +2,6 @@ package com.automart.security;
 
 
 
-import com.automart.utils.AccountUtils;
 import com.automart.utils.UserUtils;
 import com.automart.repository.UserRepository;
 
@@ -61,10 +60,7 @@ public class ApplicationConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public AccountUtils accountUtilsutils() {
-        return new AccountUtils();
-    }
+
 
     public UserUtils userIdUtils() {
         return new UserUtils();

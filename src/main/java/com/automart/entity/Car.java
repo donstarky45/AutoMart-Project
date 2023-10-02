@@ -15,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "Car")
+@Table(name = "Cars")
 public class Car implements Serializable {
     private static final Long serialVersionUID = 1L;
 
@@ -26,34 +26,37 @@ public class Car implements Serializable {
     @Column(unique = true, nullable = false)
     private String carId;
 
-    @Column(unique = true, nullable = false)
-    private String owner;
+    @ManyToOne
+    @JoinColumn(name = "owner")
+    private UserEntity owner;
 
-    @Column(unique = true, nullable = false)
+
+    @Column(nullable = false)
+    private String image;
+
+    @Column( nullable = false)
     private Date createdOn;
 
-    @Column(unique = true, nullable = false)
+    @Column( nullable = false)
     private String state;
 
-    @Column(unique = true, nullable = false)
+    @Column( nullable = false)
     private String status;
 
-    @Column(unique = true, nullable = false)
+    @Column( nullable = false)
     private double price;
 
-    @Column(unique = true, nullable = false)
+    @Column( nullable = false)
     private String manufacturer;
 
-    @Column(unique = true, nullable = false)
+    @Column( nullable = false)
     private String model;
-    @Column(unique = true, nullable = false)
+
+    @Column(nullable = false)
     private String bodyType;
 
 
 
-    @ManyToOne
-    @JoinColumn(name = "userId")
-    private UserEntity userId;
 
 
 

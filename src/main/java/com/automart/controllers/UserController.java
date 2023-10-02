@@ -4,12 +4,11 @@ package com.automart.controllers;
 
 
 
+import com.automart.request.OrderRequest;
 import com.automart.response.*;
 import com.automart.service.UserService;
-import com.automart.userRequest.TransferRequest;
-import com.automart.userRequest.UserUpdateRequest;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import com.automart.request.CarPostRequest;
+import com.automart.request.UserUpdateRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -24,10 +23,7 @@ import java.util.List;
 public class UserController {
     @Autowired
     private final UserService userService;
-    @PutMapping(path = "/transfer/{userId}")
-    public ResponseEntity<TransferResponse> transfer(@RequestBody TransferRequest request, @PathVariable String userId) {
-        return ResponseEntity.ok(userService.transfer(request, userId));
-    }
+
 
     @GetMapping(path = "/{userId}")
     public ResponseEntity<AuthenticationResponse> getUser(@PathVariable String userId){
@@ -49,21 +45,36 @@ public class UserController {
         return ResponseEntity.ok(userService.getTransaction(userId,transactionId));
     }
 
-    @GetMapping(path = "/{userId}/addresses")
-    public ResponseEntity<List<AddressResponse>> getAddresses(@PathVariable String userId){
-        return ResponseEntity.ok(userService.getAddresses(userId));
-    }
 
-    @GetMapping(path = "/{userId}/addresses/{addressId}")
-    public ResponseEntity<AddressResponse> getAddress(@PathVariable String userId, @PathVariable String addressId ){
-        return ResponseEntity.ok(userService.getAddress(userId,addressId));
-    }
 
     @PutMapping(path = "/{id}")
-
     public ResponseEntity<UpdateResponse> updateUser(@PathVariable String id, @RequestBody UserUpdateRequest userDetails) {
         return ResponseEntity.ok(userService.updateUser(id, userDetails));
     }
 
 
+    @PostMapping(path = "/ads/{id}")
+    public ResponseEntity<CarAdsResponse> postAd(@RequestBody CarPostRequest request, @PathVariable String id) {
+        return ResponseEntity.ok(userService.postAd(request,id));
+    }
+
+    @PostMapping(path = "/{userId}/{carId}")
+    public ResponseEntity<OrderResponse> orderPurchase(@RequestBody OrderRequest request, @PathVariable String userId,@PathVariable String carId) {
+        return ResponseEntity.ok(userService.orderPurchase(request, userId, carId));
+    }
+
+    @PutMapping(path = "/{userId}/{orderId}")
+    public ResponseEntity<ResponseMessages> updatePrice(@RequestBody OrderRequest request, @PathVariable String userId, @PathVariable String orderId) {
+        return ResponseEntity.ok(userService.updatePrice(request, userId, orderId));
+    }
+
+    @PutMapping(path = "/{userId}/{orderId}/accept")
+    public ResponseEntity<ResponseMessages> acceptOrder( @PathVariable String userId, @PathVariable String orderId) {
+        return ResponseEntity.ok(userService.acceptOrder( userId, orderId));
+    }
+
+    @PutMapping(path = "/{userId}/{orderId}/reject")
+    public ResponseEntity<ResponseMessages> rejectOrder( @PathVariable String userId, @PathVariable String orderId) {
+        return ResponseEntity.ok(userService.rejectOrder(userId, orderId));
+    }
 }
