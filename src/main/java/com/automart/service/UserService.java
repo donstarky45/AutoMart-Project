@@ -1,11 +1,11 @@
 package com.automart.service;
 
 
+import com.automart.request.*;
 import com.automart.response.*;
-import com.automart.request.CarPostRequest;
-import com.automart.request.RegisterRequest;
-import com.automart.request.UserLoginRequest;
-import com.automart.request.UserUpdateRequest;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
@@ -23,4 +23,10 @@ public interface UserService {
 
     UpdateResponse updateUser(String userId, UserUpdateRequest user);
   CarAdsResponse postAd(CarPostRequest request, String id);
+  OrderResponse orderPurchase( OrderRequest request, String userId, String carId);
+
+  ResponseMessages updatePrice( OrderRequest request,  String userId,  String orderId);
+  public ResponseMessages acceptOrder( String userId,  String orderId);
+
+  public ResponseMessages rejectOrder( String userId,  String orderId);
 }

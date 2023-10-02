@@ -60,9 +60,10 @@ public class UserEntity extends RepresentationModel<UserEntity> implements UserD
 
 
     @OneToMany(mappedBy=("userId"), cascade=CascadeType.ALL)
-    private List<Orders> orders;
+    private List<SentOrders> orders;
 
-
+    @OneToMany(mappedBy=("userId"), cascade=CascadeType.ALL)
+    private List<ReceivedOrders> receivedOrders;
 
     @OneToMany(mappedBy=("owner"), cascade=CascadeType.ALL)
     private List<Car> cars;

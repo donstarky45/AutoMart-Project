@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Entity
 @Table(name = "orders")
-public class Orders {
+public class SentOrders {
     @Id
     @GeneratedValue
     private long id;
@@ -24,13 +24,15 @@ public class Orders {
     private UserEntity userId;
 
     @Column(nullable = false)
+    private String orderId;
+    @Column(nullable = false)
     private String orderType;
 
     @Column(nullable = false)
    private String carId;
 
     @Column(nullable = false)
-    private double amount;
+    private double price;
 
     @Column(nullable = false)
     private String  status;

@@ -2,23 +2,16 @@ package com.automart.service;
 
 
 import com.automart.controllers.UserController;
-import com.automart.entity.Car;
-import com.automart.entity.Transactions;
+import com.automart.entity.*;
 import com.automart.exceptions.ErrorMessages;
 import com.automart.exceptions.UserServiceException;
-import com.automart.repository.CarRepository;
-import com.automart.repository.TransactionsRepository;
+import com.automart.repository.*;
 
+import com.automart.request.*;
 import com.automart.response.*;
 import com.automart.security.JwtService;
 
-import com.automart.request.CarPostRequest;
-import com.automart.request.RegisterRequest;
-import com.automart.request.UserLoginRequest;
-import com.automart.request.UserUpdateRequest;
 import com.automart.utils.UserUtils;
-import com.automart.entity.UserEntity;
-import com.automart.repository.UserRepository;
 import com.automart.shared.UserDto;
 import lombok.RequiredArgsConstructor;
 
@@ -45,6 +38,9 @@ public class UserServiceImpl implements UserService {
     private final UserRepository repository;
 
   private final CarRepository carRepository;
+
+    private final OrderRepository orderRepository;
+    private final ReceivedOrdersRepository receivedOrdersRepository;
     private final TransactionsRepository transactionsRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
@@ -257,7 +253,7 @@ if (owner == null) throw new UserServiceException(ErrorMessages.RECORD_NOT_FOUND
        owner.getCars().add(car);
 
        return CarAdsResponse.builder()
-               .response(Messages.POSTED.getMessage())
+               .response(ResponseMessages.POSTED.getMessage())
                .carId(car.getCarId())
                .bodyType(car.getBodyType())
                .createdOn(car.getCreatedOn())
@@ -270,6 +266,110 @@ if (owner == null) throw new UserServiceException(ErrorMessages.RECORD_NOT_FOUND
                .build();
 
    }
+  public  OrderResponse orderPurchase(OrderRequest request, String userId,String carId){
+        UserEntity buyer = repository.findByUserId(userId);
+        Car car = carRepository.findByCarId(carId);
+      UserEntity seller = repository.findByUserId(car.getOwner().getUserId());
+
+        if (buyer== null || seller == null ) throw new UserServiceException(ErrorMessages.RECORD_NOT_FOUND.getErrorMessage());
+
+      SentOrders sentOrder = SentOrders.builder()
+              .orderId(userUtils.generateOrderId(6))
+              .orderType(ResponseMessages.SENT_ORDER.getMessage())
+              .userId(buyer)
+              .carId(carId)
+              .price(request.getPrice())
+              .status(ResponseMessages.ORDER_PENDING_ACCEPTANCE.getMessage())
+              .build();
+      buyer.getOrders().add(sentOrder);
+      if (orderRepository.findByOrderId(sentOrder.getOrderId()) != null) throw new UserServiceException(ErrorMessages.RECORD_ALREADY_EXISTS.getErrorMessage());
+      orderRepository.save(sentOrder);
+      ReceivedOrders receivedOrder = ReceivedOrders.builder()
+              .orderId(sentOrder.getOrderId())
+              .orderType(ResponseMessages.RECEIVED_ORDER.getMessage())
+              .userId(seller)
+              .carId(sentOrder.getCarId())
+              .price(sentOrder.getPrice())
+              .status(ResponseMessages.ORDER_PENDING_ACCEPTANCE.getMessage())
+              .build();
+      seller.getReceivedOrders().add(receivedOrder);
+      receivedOrdersRepository.save(receivedOrder);
+
+
+        return OrderResponse.builder()
+                .buyer(buyer.getFirstName() + " " +buyer.getLastName())
+                .seller(seller.getFirstName() + " "+ seller.getLastName())
+                .orderType(ResponseMessages.SENT_ORDER.getMessage())
+                .carId(sentOrder.getCarId())
+                .price(sentOrder.getPrice())
+                .status(ResponseMessages.ORDER_PENDING_ACCEPTANCE.getMessage())
+                .build();
+    }
+   public ResponseMessages updatePrice( OrderRequest request,  String userId,  String orderId){
+SentOrders order = orderRepository.findByOrderId(orderId);
+ReceivedOrders receivedOrder = receivedOrdersRepository.findByOrderId(orderId);
+UserEntity user = repository.findByUserId(userId);
+
+if (order == null || receivedOrder == null) throw new UserServiceException(ErrorMessages.RECORD_NOT_FOUND.getErrorMessage());
+
+if(!user.getOrders().contains(order)) throw new UserServiceException(ErrorMessages.ONLY_BUYERS_CAN_UPDATE_ORDER_PRICE.getErrorMessage());
+
+order.setPrice(request.getPrice());
+receivedOrder.setPrice(request.getPrice());
+
+orderRepository.save(order);
+receivedOrdersRepository.save(receivedOrder);
+
+
+
+return ResponseMessages.PRICE_UPDATED;
+
+    }
+
+    public ResponseMessages acceptOrder( String userId,  String orderId){
+
+
+        SentOrders order = orderRepository.findByOrderId(orderId);
+        ReceivedOrders receivedOrder = receivedOrdersRepository.findByOrderId(orderId);
+        UserEntity user = repository.findByUserId(userId);
+
+        if(user.getReceivedOrders().contains(receivedOrder)){
+            receivedOrder.setStatus(ResponseMessages.ORDER_ACCEPTED.getMessage());
+            order.setStatus(ResponseMessages.ORDER_ACCEPTED.getMessage());
+
+            orderRepository.save(order);
+            receivedOrdersRepository.save(receivedOrder);
+
+        }else {
+            throw new UserServiceException(ErrorMessages.ONLY_SELLERS_CAN_UPDATE_STATUS.getErrorMessage());
+        }
+
+
+        return ResponseMessages.ORDER_ACCEPTED;
+
+    }
+
+    public ResponseMessages rejectOrder( String userId,  String orderId){
+
+        SentOrders order = orderRepository.findByOrderId(orderId);
+        ReceivedOrders receivedOrder = receivedOrdersRepository.findByOrderId(orderId);
+        UserEntity user = repository.findByUserId(userId);
+
+        if(user.getReceivedOrders().contains(receivedOrder)){
+            receivedOrder.setStatus(ResponseMessages.ORDER_REJECTED.getMessage());
+            order.setStatus(ResponseMessages.ORDER_REJECTED.getMessage());
+
+            orderRepository.save(order);
+            receivedOrdersRepository.save(receivedOrder);
+
+        }else {
+            throw new UserServiceException(ErrorMessages.ONLY_SELLERS_CAN_UPDATE_STATUS.getErrorMessage());
+        }
+
+
+        return ResponseMessages.ORDER_REJECTED;
+
+    }
 
 
 }
