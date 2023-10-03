@@ -5,12 +5,9 @@ package com.automart.controllers;
 
 
 import com.automart.entity.Car;
-import com.automart.request.CarFilterRequest;
-import com.automart.request.OrderRequest;
+import com.automart.request.*;
 import com.automart.response.*;
 import com.automart.service.UserService;
-import com.automart.request.CarPostRequest;
-import com.automart.request.UserUpdateRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -126,4 +123,9 @@ public class UserController {
         return ResponseEntity.ok(userService.viewAvailableCarsManufacturer(request));
     }
 
+
+    @PostMapping(path = "/{carId}/flag")
+    public ResponseEntity<FlagResponse> flagAds(@RequestBody FlagRequest request, @PathVariable  String carId){
+        return ResponseEntity.ok(userService.flagAds(request, carId));
+    }
 }

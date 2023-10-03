@@ -42,6 +42,9 @@ public class UserServiceImpl implements UserService {
     private final CarRepository carRepository;
 
     private final OrderRepository orderRepository;
+
+    private final FlagRepository flagRepository;
+
     private final ReceivedOrdersRepository receivedOrdersRepository;
     private final TransactionsRepository transactionsRepository;
     private final PasswordEncoder passwordEncoder;
@@ -662,6 +665,33 @@ public class UserServiceImpl implements UserService {
 
         if (carsList.isEmpty()) throw new UserServiceException(ErrorMessages.RECORD_NOT_FOUND.getErrorMessage());
         return carsList;
+
+    }
+
+    public FlagResponse flagAds(FlagRequest request, String carId) {
+        Car car = carRepository.findByCarId(carId);
+        if (car == null) throw new UserServiceException(ErrorMessages.RECORD_NOT_FOUND.getErrorMessage());
+
+Flag flag = Flag.builder()
+        .carId(car)
+        .userId(car.getOwner())
+        .reportId(userUtils.generateReportId(6))
+        .createOn(date)
+        .reason(request.getReason())
+        .description(request.getDescription())
+        .build();
+
+car.getOwner().getFlags().add(flag);
+car.getFlags().add(flag);
+flagRepository.save(flag);
+
+return FlagResponse.builder()
+        .carId(carId)
+        .owner(car.getOwner().getFirstName() +" " + car.getOwner().getLastName())
+        .createOn(flag.getCreateOn())
+        .reason(flag.getReason())
+        .description(flag.getDescription())
+        .build();
 
     }
 }

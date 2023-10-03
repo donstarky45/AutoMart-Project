@@ -48,4 +48,5 @@ public interface UserService {
     List<CarAdsResponse> viewAvailableAndNewCars();
     List<CarAdsResponse> viewAvailableAndUsedCars();
     List<CarAdsResponse> viewAvailableCarsManufacturer(CarFilterRequest request);
+  FlagResponse flagAds(FlagRequest request, String carId);
 }
