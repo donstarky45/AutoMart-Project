@@ -1,5 +1,5 @@
 package com.automart.response;
 
 public enum OperationalResult {
-    ERROR, SUCCESS, UPDATED, POSTED
+    ERROR, SUCCESS, UPDATED, POSTED, SOLD
 }

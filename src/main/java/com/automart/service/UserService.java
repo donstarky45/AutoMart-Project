@@ -1,6 +1,7 @@
 package com.automart.service;
 
 
+import com.automart.entity.Car;
 import com.automart.request.*;
 import com.automart.response.*;
 import org.springframework.http.ResponseEntity;
@@ -29,4 +30,22 @@ public interface UserService {
   public ResponseMessages acceptOrder( String userId,  String orderId);
 
   public ResponseMessages rejectOrder( String userId,  String orderId);
+
+  OperationalResult markAsSold(String carId);
+
+  OperationalResult adPriceUpdate(  OrderRequest request,  String carId);
+
+  CarAdsResponse viewCar(String carId);
+
+  List<CarAdsResponse> viewAvailaleCars();
+
+ List<CarAdsResponse> viewAvailaleCarsWithPrice(OrderRequest request);
+  DeleteResponse deleteAd(String carId);
+  List<CarAdsResponse> viewAllCars();
+
+  List<CarAdsResponse> viewSoldCars();
+    List<CarAdsResponse> viewCarsByBodyType(CarFilterRequest request);
+    List<CarAdsResponse> viewAvailableAndNewCars();
+    List<CarAdsResponse> viewAvailableAndUsedCars();
+    List<CarAdsResponse> viewAvailableCarsManufacturer(CarFilterRequest request);
 }
