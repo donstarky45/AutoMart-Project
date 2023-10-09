@@ -7,13 +7,17 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Table(name = "orders")
-public class SentOrders {
+public class SentOrders implements Serializable {
+
+    private static final Long serialVersionUID = 1L;
     @Id
     @GeneratedValue
     private long id;

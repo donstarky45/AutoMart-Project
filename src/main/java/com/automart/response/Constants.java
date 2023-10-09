@@ -8,9 +8,11 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum Constants {
     AVAILABLE("AVAILABLE"),
+    SOLD("SOLD"),
     RECORD_ALREADY_EXISTS("User already exists"),
     DETAILS_ALREADY_EXISTS("Please Provide a Different User Detail"),
-   ALREADY_SUBSCRIBED(" You are already subscribed to this user"),
+   NEW("new"),
+    USED("used"),
     INSUFFICIENT_FUNDS("Insufficient funds"),
     INVALID_VALUE("Please enter a valid amount");
     private String Message;

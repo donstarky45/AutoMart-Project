@@ -21,7 +21,9 @@ public class UserUtils {
     public String generateAdressId(int length){
         return generateRandomString(length);
     }
-
+    public String generateReportId(int length){
+        return generateRandomString(length);
+    }
     public String generateOrderId(int length){
         return generateRandomString(length);
     }

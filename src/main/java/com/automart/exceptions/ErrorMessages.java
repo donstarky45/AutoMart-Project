@@ -6,7 +6,7 @@ import lombok.*;
 
 @AllArgsConstructor
 public enum ErrorMessages {
-    RECORD_NOT_FOUND("User not found"),
+    RECORD_NOT_FOUND("Not found"),
     ONLY_SELLERS_CAN_UPDATE_STATUS("Only Sellers can Accept or Reject Order"),
 
     ONLY_BUYERS_CAN_UPDATE_ORDER_PRICE("Only Buyers can Update Order Price"),

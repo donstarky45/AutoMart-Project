@@ -16,7 +16,7 @@ public class CarAdsResponse {
 
 
     private String response;
-
+    private String owner;
     private String carId;
 
     private String image;

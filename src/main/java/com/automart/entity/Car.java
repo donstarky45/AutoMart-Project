@@ -30,6 +30,9 @@ public class Car implements Serializable {
     @JoinColumn(name = "owner")
     private UserEntity owner;
 
+    @OneToMany(mappedBy=("carId"), cascade=CascadeType.ALL)
+    private List<Flag> flags;
+
 
     @Column(nullable = false)
     private String image;

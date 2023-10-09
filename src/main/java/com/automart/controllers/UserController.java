@@ -4,15 +4,15 @@ package com.automart.controllers;
 
 
 
-import com.automart.request.OrderRequest;
+import com.automart.entity.Car;
+import com.automart.request.*;
 import com.automart.response.*;
 import com.automart.service.UserService;
-import com.automart.request.CarPostRequest;
-import com.automart.request.UserUpdateRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -76,5 +76,56 @@ public class UserController {
     @PutMapping(path = "/{userId}/{orderId}/reject")
     public ResponseEntity<ResponseMessages> rejectOrder( @PathVariable String userId, @PathVariable String orderId) {
         return ResponseEntity.ok(userService.rejectOrder(userId, orderId));
+    }
+
+
+    @PutMapping(path = "/{carId}/sold")
+    public ResponseEntity<OperationalResult> markAsSold( @PathVariable String carId) {
+        return ResponseEntity.ok(userService.markAsSold( carId));
+    }
+
+    @PutMapping(path = "/{carId}/price")
+    public ResponseEntity<OperationalResult> adPriceUpdate( @RequestBody OrderRequest request, @PathVariable String carId) {
+        return ResponseEntity.ok(userService.adPriceUpdate(request, carId));
+    }
+
+    @GetMapping(path = "view/{carId}")
+    public ResponseEntity<CarAdsResponse> viewCar(@PathVariable String carId) {
+        return ResponseEntity.ok(userService.viewCar(carId));
+    }
+
+    @GetMapping(path = "/cars/available")
+    public ResponseEntity<List<CarAdsResponse>> viewAvailaleCars() {
+        return ResponseEntity.ok(userService.viewAvailaleCars());
+    }
+
+    @GetMapping(path = "/cars/price/filter")
+    public ResponseEntity<List<CarAdsResponse>> viewAvailaleCarsWithPrice(@RequestBody OrderRequest request) {
+        return ResponseEntity.ok(userService.viewAvailaleCarsWithPrice(request));
+    }
+    @GetMapping(path = "/cars/type")
+    public ResponseEntity<List<CarAdsResponse>> viewCarsByBodyType(@RequestBody CarFilterRequest request) {
+        return ResponseEntity.ok(userService.viewCarsByBodyType(request));
+    }
+
+    @GetMapping(path = "/cars/new")
+    public ResponseEntity<List<CarAdsResponse>> viewAvailableAndNewCars() {
+        return ResponseEntity.ok(userService.viewAvailableAndNewCars());
+    }
+
+    @GetMapping(path = "/cars/used")
+    public ResponseEntity<List<CarAdsResponse>> viewAvailableAndUsedCars() {
+        return ResponseEntity.ok(userService.viewAvailableAndUsedCars());
+    }
+
+    @GetMapping(path = "/cars/manufacturer")
+    public ResponseEntity<List<CarAdsResponse>> viewAvailableCarsManufacturer(@RequestBody CarFilterRequest request) {
+        return ResponseEntity.ok(userService.viewAvailableCarsManufacturer(request));
+    }
+
+
+    @PostMapping(path = "/{carId}/flag")
+    public ResponseEntity<FlagResponse> flagAds(@RequestBody FlagRequest request, @PathVariable  String carId){
+        return ResponseEntity.ok(userService.flagAds(request, carId));
     }
 }

@@ -1,6 +1,7 @@
 package com.automart.controllers;
 
 
+import com.automart.response.CarAdsResponse;
 import com.automart.response.DeleteResponse;
 import com.automart.service.AdminService;
 import com.automart.service.UserService;
@@ -12,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/admin")
@@ -45,6 +48,21 @@ public class AdminController {
         return ResponseEntity.ok(userService.deleteUser(userId));
     }
 
+    @DeleteMapping (path = "delete/{carId}")
+    @PreAuthorize("hasAuthority('admin:delete')")
+    public ResponseEntity<DeleteResponse> deleteAd(@PathVariable String carId) {
+        return ResponseEntity.ok(userService.deleteAd(carId));
+    }
+    @GetMapping(path = "/cars")
+    @PreAuthorize("hasAuthority('admin:read')")
+    public ResponseEntity<List<CarAdsResponse>> viewAllCars() {
+        return ResponseEntity.ok(userService.viewAllCars());
+    }
 
+    @GetMapping(path = "/cars/sold")
+    @PreAuthorize("hasAuthority('admin:read')")
+    public ResponseEntity<List<CarAdsResponse>> viewSoldCars() {
+        return ResponseEntity.ok(userService.viewSoldCars());
+    }
 
 }
